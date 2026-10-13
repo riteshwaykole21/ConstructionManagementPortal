@@ -22,5 +22,12 @@ namespace ConstructionManagement.API.Controllers
 
             return Ok(projects);
         }
+        [HttpPost]
+        public async Task<ActionResult<Project>> PostProject(Project project)
+        {
+            _context.Projects.Add(project);
+            await _context.SaveChangesAsync();
+            return StatusCode(201, project);
+        }
     }
 }
