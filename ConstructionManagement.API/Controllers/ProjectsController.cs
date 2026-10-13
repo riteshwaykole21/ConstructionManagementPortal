@@ -54,5 +54,20 @@ namespace ConstructionManagement.API.Controllers
 
             return Ok(existingProject);
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProject(int id)
+        {
+            var project = await _context.Projects.FindAsync(id);
+
+            if (project == null)
+            {
+                return NotFound("Project not found.");
+            }
+
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
