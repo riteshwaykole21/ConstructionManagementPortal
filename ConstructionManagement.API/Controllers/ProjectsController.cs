@@ -25,16 +25,56 @@ namespace ConstructionManagement.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Project>> PostProject(Project project)
         {
+            if (string.IsNullOrWhiteSpace(project.Location))
+            {
+                return BadRequest("Location is required.");
+            }
+
+            if (project.StartDate.HasValue &&
+                project.EndDate.HasValue &&
+                project.EndDate < project.StartDate)
+            {
+                return BadRequest("End date cannot be earlier than start date.");
+            }
+
+            if (project.Budget.HasValue && project.Budget < 0)
+            {
+                return BadRequest("Budget cannot be negative.");
+            }
+
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
+
             return StatusCode(201, project);
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProject(int id, Project project)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Project ID must be greater than zero.");
+            }
+
             if (id != project.ProjectId)
             {
                 return BadRequest("Project ID mismatch.");
+            }
+
+            if (string.IsNullOrWhiteSpace(project.Location))
+            {
+                return BadRequest("Location is required.");
+            }
+
+            if (project.StartDate.HasValue &&
+                project.EndDate.HasValue &&
+                project.EndDate < project.StartDate)
+            {
+                return BadRequest("End date cannot be earlier than start date.");
+            }
+
+            if (project.Budget.HasValue && project.Budget < 0)
+            {
+                return BadRequest("Budget cannot be negative.");
             }
 
             var existingProject = await _context.Projects.FindAsync(id);
@@ -57,6 +97,11 @@ namespace ConstructionManagement.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Project ID must be greater than zero.");
+            }
+
             var project = await _context.Projects.FindAsync(id);
 
             if (project == null)
