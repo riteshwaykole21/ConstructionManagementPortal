@@ -29,5 +29,30 @@ namespace ConstructionManagement.API.Controllers
             await _context.SaveChangesAsync();
             return StatusCode(201, project);
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProject(int id, Project project)
+        {
+            if (id != project.ProjectId)
+            {
+                return BadRequest("Project ID mismatch.");
+            }
+
+            var existingProject = await _context.Projects.FindAsync(id);
+
+            if (existingProject == null)
+            {
+                return NotFound("Project not found.");
+            }
+
+            existingProject.Location = project.Location;
+            existingProject.StartDate = project.StartDate;
+            existingProject.EndDate = project.EndDate;
+            existingProject.Budget = project.Budget;
+            existingProject.Status = project.Status;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(existingProject);
+        }
     }
 }
