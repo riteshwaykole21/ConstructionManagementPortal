@@ -22,6 +22,21 @@ namespace ConstructionManagement.API.Controllers
 
             return Ok(projects);
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult>GetProject(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Project ID");
+            }
+            var project = await _context.Projects.FindAsync(id);
+            if (project == null)
+            {
+                return NotFound("Project not found");
+            }
+            return Ok(project);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Project>> PostProject(Project project)
         {
