@@ -46,5 +46,31 @@ namespace ConstructionManagement.API.Controllers
 
             return Ok(employee);
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEmployee(int id, Employee employee)
+        {
+            if (id != employee.EmployeeId)
+            {
+                return BadRequest("Employee ID mismatch.");
+            }
+
+            var existingEmployee = await _context.Employees
+                .FindAsync(id);
+
+            if (existingEmployee == null)
+            {
+                return NotFound();
+            }
+
+            existingEmployee.FullName = employee.FullName;
+            existingEmployee.Email = employee.Email;
+            existingEmployee.Designation = employee.Designation;
+            existingEmployee.JoiningDate = employee.JoiningDate;
+            existingEmployee.IsActive = employee.IsActive;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
