@@ -172,5 +172,27 @@ namespace ConstructionManagement.API.Controllers
             return Ok(task);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Task ID");
+            }
+
+            var task = await _context.Tasks.FindAsync(id);
+
+            if (task == null)
+            {
+                return NotFound("Task not found");
+            }
+
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
     }
 }
