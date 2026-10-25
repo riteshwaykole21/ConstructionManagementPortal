@@ -38,6 +38,69 @@ namespace ConstructionManagement.API.Controllers
 
             return Ok(task);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateTask(CreateTaskDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.TaskName))
+            {
+                return BadRequest("Task Name is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Status))
+            {
+                return BadRequest("Status is required");
+            }
+
+            if (dto.ProjectId <= 0)
+            {
+                return BadRequest("Valid Project ID is required");
+            }
+
+            var projectExists = await _context.Projects
+                .AnyAsync(p => p.ProjectId == dto.ProjectId);
+
+            if (!projectExists)
+            {
+                return BadRequest("Project does not exist");
+            }
+
+            if (dto.AssignedTo.HasValue)
+            {
+                var employeeExists = await _context.Employees
+                    .AnyAsync(e => e.EmployeeId == dto.AssignedTo.Value);
+
+                if (!employeeExists)
+                {
+                    return BadRequest("Assigned Employee does not exist");
+                }
+            }
+
+            if (dto.StartDate.HasValue &&
+                dto.DueDate.HasValue &&
+                dto.DueDate < dto.StartDate)
+            {
+                return BadRequest("Due Date cannot be earlier than Start Date");
+            }
+
+            var task = new ConstructionManagement.API.Models.Task
+            {
+                TaskName = dto.TaskName,
+                Description = dto.Description,
+                ProjectId = dto.ProjectId,
+                AssignedTo = dto.AssignedTo,
+                StartDate = dto.StartDate,
+                DueDate = dto.DueDate,
+                Status = dto.Status
+            };
+
+            _context.Tasks.Add(task);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(
+                nameof(GetTask),
+                new { id = task.TaskId },
+                task);
+        }
     }
-   
 }
