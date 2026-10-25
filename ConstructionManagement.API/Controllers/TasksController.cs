@@ -102,5 +102,75 @@ namespace ConstructionManagement.API.Controllers
                 new { id = task.TaskId },
                 task);
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(int id, CreateTaskDto dto)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Task ID");
+            }
+
+            var task = await _context.Tasks.FindAsync(id);
+
+            if (task == null)
+            {
+                return NotFound("Task not found");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.TaskName))
+            {
+                return BadRequest("Task Name is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Status))
+            {
+                return BadRequest("Status is required");
+            }
+
+            if (dto.ProjectId <= 0)
+            {
+                return BadRequest("Valid Project ID is required");
+            }
+
+            var projectExists = await _context.Projects
+                .AnyAsync(p => p.ProjectId == dto.ProjectId);
+
+            if (!projectExists)
+            {
+                return BadRequest("Project does not exist");
+            }
+
+            if (dto.AssignedTo.HasValue)
+            {
+                var employeeExists = await _context.Employees
+                    .AnyAsync(e => e.EmployeeId == dto.AssignedTo.Value);
+
+                if (!employeeExists)
+                {
+                    return BadRequest("Assigned Employee does not exist");
+                }
+            }
+
+            if (dto.StartDate.HasValue &&
+                dto.DueDate.HasValue &&
+                dto.DueDate.Value < dto.StartDate.Value)
+            {
+                return BadRequest("Due Date cannot be earlier than Start Date");
+            }
+
+            task.TaskName = dto.TaskName;
+            task.Description = dto.Description;
+            task.ProjectId = dto.ProjectId;
+            task.AssignedTo = dto.AssignedTo;
+            task.StartDate = dto.StartDate;
+            task.DueDate = dto.DueDate;
+            task.Status = dto.Status;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(task);
+        }
+
     }
 }
