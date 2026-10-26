@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ConstructionManagement.API.Models
@@ -6,8 +7,10 @@ namespace ConstructionManagement.API.Models
     public class CreateTaskDto
     {
         [Required]
+        [StringLength(150)]
         public string TaskName { get; set; } = string.Empty;
 
+        [StringLength(500)]
         public string? Description { get; set; }
 
         [Range(1, int.MaxValue)]
@@ -20,6 +23,7 @@ namespace ConstructionManagement.API.Models
         public DateOnly? DueDate { get; set; }
 
         [Required]
+        [StringLength(30)]
         public string Status { get; set; } = string.Empty;
     }
 }
